@@ -1,0 +1,16 @@
+.table tr {
+    background: black;
+    color: red;
+
+}
+
+.table tbody {
+    border-top-style: solid;
+    border-top-color: red;
+}
+
+.table td{
+    border-top: none !important;
+    background: black;
+    color: red;
+}
