@@ -49,12 +49,13 @@ server <- function(input, output, session) {
     
     observeEvent(action(),{
         if(action() == "show") {
+            delay(1000, {
             addClass("infotable", class = "animated slideInLeft")
             addClass("infobox", class = "animated slideInLeft")
             
             removeClass("infotable", class = "slideOutLeft")
             removeClass("infobox", class = "slideOutLeft")
-        }
+        })}
         
         if(action() == "hide") {
             removeClass("infotable", class = "slideInLeft")
