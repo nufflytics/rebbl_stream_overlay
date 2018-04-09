@@ -17,25 +17,29 @@ ui <- fluidPage(
     tags$head(
         #tags$script(src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"),
         tags$link(rel = "stylesheet", type = "text/css", href = "css/ladder.css"),
-        tags$link(rel="stylesheet", type="text/css", href = "https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css")
-        ),
+        tags$link(rel="stylesheet", type="text/css", href = "https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css"),
+        tags$style("
+@import url('https://fonts.googleapis.com/css?family=Alegreya+SC:800|Open+Sans:600');
+                   ")
+    ),
     uiOutput("infobox"),
-    tableOutput("infotable"),
-    verbatimTextOutput("debug")
+    uiOutput("splash"),
+    tableOutput("infotable")
+    #verbatimTextOutput("debug")
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-   data <- reactiveFileReader(500, session, "../rebbl_streamer_tools/data/infobox.rds", readRDS)
-   action <- reactiveFileReader(500, session, "../rebbl_streamer_tools/data/action.rds", readRDS)
-   
-   output$infobox <- renderUI({
-       validate(need(data(), message = F))
-       
-       if(data()$type == "ladder") return(NULL)
-       
-   })
- 
+    data <- reactiveFileReader(5000, session, "../rebbl_streamer_tools/data/infobox.rds", readRDS)
+    action <- reactiveFileReader(5000, session, "../rebbl_streamer_tools/data/action.rds", readRDS)
+    
+    output$infobox <- renderUI({
+        validate(need(data(), message = F))
+        
+        if(data()$type == "ladder") return(NULL)
+        
+    })
+    
     output$infotable <- renderTable({
         validate(need(data(), message = F))
         
@@ -43,26 +47,49 @@ server <- function(input, output, session) {
         
         data()$content
     },
-    spacing = "s")
+    spacing = "xs")
+    
+    output$splash <- renderUI({
+        validate(need(data(), message = F))
+        
+        if(data()$type != "splash") return(NULL)
+        
+        #runjs("$('body').addClass('splash_body')")
+        data()$content
+    })
     
     output$debug <- renderText(c(as.character(data()), action()))
     
     observeEvent(action(),{
         if(action() == "show") {
             delay(1000, {
-            addClass("infotable", class = "animated slideInLeft")
-            addClass("infobox", class = "animated slideInLeft")
+                addClass("infotable", class = "animated fadeInLeft")
+                addClass("infobox", class = "animated fadeInLeft")
+                addClass("splash", class = "animated fadeIn")
+
+                removeClass("infotable", class = "fadeOutLeft")
+                removeClass("infobox", class = "fadeOutLeft")
+                removeClass("splash", class = "fadeOut")
+            })
             
-            removeClass("infotable", class = "slideOutLeft")
-            removeClass("infobox", class = "slideOutLeft")
-        })}
+        if(data()$type == "splash") {
+            delay(10000, {runjs("$('.identifier').addClass('gone')")})
+        }
+        }
         
         if(action() == "hide") {
-            removeClass("infotable", class = "slideInLeft")
-            removeClass("infobox", class = "slideInLeft")
-            
-            addClass("infotable", class = "animated slideOutLeft")
-            addClass("infobox", class = "animated slideOutLeft")
+            delay(300, {
+                removeClass("infotable", class = "fadeInLeft")
+                removeClass("infobox", class = "fadeInLeft")
+                removeClass("splash", class = "fadeIn")
+                
+                addClass("infotable", class = "animated fadeOutLeft")
+                addClass("infobox", class = "animated fadeOutLeft")
+                addClass("splash", class = "animated fadeOut")
+                
+                
+                #runjs("$('body').removeClass('splash_body')")
+            })
         }
     })
 }
